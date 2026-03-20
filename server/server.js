@@ -41,10 +41,25 @@ io.on("connection", (socket)=>{
 app.use(express.json({limit: "4mb"}));
 
 // app.use(cors());
+// app.use(cors({
+//   origin: ["http://localhost:5173", "https://chat-app-frontend-theta-pink.vercel.app"],
+//   credentials: true
+// }));
 app.use(cors({
-  origin: ["http://localhost:5173", "https://your-frontend.vercel.app"],
+  origin: function(origin, callback){
+    const allowedOrigins = [
+      "http://localhost:5173",
+      "https://chat-app-frontend-theta-pink.vercel.app"
+    ];
+    if(!origin || allowedOrigins.includes(origin)){
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
-}));
+}));    
+app.options("*", cors());
 
 // Routes setup
 app.use("/api/status", (req, res)=> res.send("Server is live..."));
