@@ -79,7 +79,8 @@ export const AuthProvider = ({ children })=>{
         const newSocket = io(backendUrl, {
             query: {
                 userId: userData._id,
-            }
+            },
+            transports: ["websocket"]
         });
         newSocket.connect();
         setSocket(newSocket);
