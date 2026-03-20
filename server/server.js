@@ -14,8 +14,11 @@ const server = http.createServer(app)
 
 // Initialize socket.io server
 export const io = new Server(server, {
-    cors: {origin: "*"}
-})
+  cors: {
+    origin: "https://chat-app-frontend-theta-pink.vercel.app",
+    credentials: true
+  }
+});
 
 // Store online users
 export const userSocketMap = {}; // { userId: socketId }
@@ -41,13 +44,13 @@ io.on("connection", (socket)=>{
 app.use(express.json({limit: "4mb"}));
 
 // app.use(cors());
-app.use(cors({
+const corsOptions = {
   origin: "https://chat-app-frontend-theta-pink.vercel.app",
   credentials: true
-}));
+};
 
-// VERY IMPORTANT
-app.options("*", cors());
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); 
 
 // Routes setup
 app.use("/api/status", (req, res)=> res.send("Server is live..."));
