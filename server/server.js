@@ -67,7 +67,6 @@
 // });
 
 
-
 import express from "express";
 import "dotenv/config";
 import cors from "cors";
@@ -84,9 +83,8 @@ const server = http.createServer(app);
 // ================= SOCKET.IO =================
 export const io = new Server(server, {
   cors: {
-    origin: "https://chat-app-frontend-theta-pink.vercel.app",
-    methods: ["GET", "POST"],
-    credentials: true
+    origin: "*", // 🔥 allow all
+    methods: ["GET", "POST"]
   }
 });
 
@@ -100,7 +98,6 @@ io.on("connection", (socket) => {
 
   if (userId) userSocketMap[userId] = socket.id;
 
-  // Emit online users
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
   socket.on("disconnect", () => {
@@ -113,20 +110,14 @@ io.on("connection", (socket) => {
 // ================= MIDDLEWARE =================
 app.use(express.json({ limit: "4mb" }));
 
-const corsOptions = {
-  origin: "https://chat-app-frontend-theta-pink.vercel.app",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-};
+// 🔥 FULLY OPEN CORS
+app.use(cors()); // allows everything
 
-// Apply CORS
-app.use(cors(corsOptions));
-
-// 🔥 Handle preflight manually (IMPORTANT FIX)
+// 🔥 EXTRA safety headers (force allow)
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://chat-app-frontend-theta-pink.vercel.app");
+  res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, token");
+  res.header("Access-Control-Allow-Headers", "*");
 
   if (req.method === "OPTIONS") {
     return res.sendStatus(200);
