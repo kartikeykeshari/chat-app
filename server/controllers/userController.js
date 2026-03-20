@@ -38,11 +38,15 @@ export const signup = async (req, res)=> {
 export const login = async (req, res)=> {
     try{
         const { email, password } = req.body;
-        const userData = await User.findOne({email})
+        const userData = await User.findOne({ email });
+        if (!userData) {
+            return res.json({ success: false, message: "User not found" });
+        }
+
         const isPasswordCorrect = await bcrypt.compare(password, userData.password);
 
-        if(!isPasswordCorrect){
-            return res.json({success: false, message: "Invalid Credentials"})
+        if (!isPasswordCorrect) {
+            return res.json({ success: false, message: "Invalid Credentials" });
         }
 
         const token = generateToken(userData._id)
@@ -66,14 +70,20 @@ export const updateProfile = async (req, res)=>{
         const userId = req.user._id;
         let updatedUser;
 
-        if(!profilePic){
-            await User.findByIdAndUpdate(userId, {bio, fullName}, {bio, fullName}, {new: true});
-
-        }
-        else{
+        if (!profilePic) {
+            updatedUser = await User.findByIdAndUpdate(
+                userId,
+                { bio, fullName },
+                { new: true }
+            );
+        } else {
             const upload = await cloudinary.uploader.upload(profilePic);
 
-            updatedUser = await User.findByIdAndUpdate(userId, {profilePic: upload.secure_url, bio, fullName}, {new: true});
+            updatedUser = await User.findByIdAndUpdate(
+                userId,
+                { profilePic: upload.secure_url, bio, fullName },
+                { new: true }
+            );
         }
         res.json({success: true, user: updatedUser})
     } catch (error) {
